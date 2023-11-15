@@ -36,11 +36,12 @@ while True:
         print(textoUltimaMensagem)
 
         # Responda a mensagem do cliente
+        mensagem = ""
         if nome not in usuariosAtendidos:
             mensagem = "Olá, eu sou o ROBOCOP"
+            usuariosAtendidos.append(nome)
         else:
             mensagem = "Ainda não sei muita coisa, me desculpe"
-            usuariosAtendidos.append(nome)
         if mensagem != "":
             caixaMensagem = WebDriverWait(navegador, 5).until(
                 EC.presence_of_element_located((By.CLASS_NAME, "_3Uu1_")))
@@ -54,7 +55,6 @@ while True:
         fecharConversa.click()
         print(nome, usuariosAtendidos)
         time.sleep(3)
-        mensagem = ""
     except:
         time.sleep(1)
         continue
