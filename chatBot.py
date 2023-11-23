@@ -1,3 +1,5 @@
+# Dê o comando: pip install selenium
+
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import time
@@ -9,7 +11,7 @@ import datetime
 print("It's running!")
 
 # Abrindo o navegador e redirecionando para o WhatsApp Web
-navegador = webdriver.Chrome()
+navegador = webdriver.Edge()
 navegador.maximize_window()
 navegador.get("https://web.whatsapp.com/")
 
@@ -25,7 +27,7 @@ with open('ultimaExecucao.txt', 'r') as arquivoUltimaExecucao:
 
 # Converte o texto de ultimaExecucao.txt para um objeto datetime, se houver
 if ultimaExecucaoTxt:
-    ultimaExecucaoSalva = ultimaExecucaoTxt
+    ultimaExecucaoSalva = ultimaExecucaoTxt 
 else:
     ultimaExecucaoSalva = None
 
@@ -133,7 +135,7 @@ while True:
 
                 elif textoUltimaMensagem.lower() in ["2", "2-", "2 -", "marcar reunião", "marcar", "reunião", "two", "dois", "agendar reunião", "agendar", "agendar reuniao", "agendar reuniao", "marca", "agenda"]:
 
-                    mensagem = """Para agendar um reunião, acesse o link: https://calendly.com/felipebittencourt-4-o\nSelecione o serviço desejado e o reunião disponível, em seguida preencha com seu nome e email para identificação."""
+                    mensagem = """Para agendar uma reunião, acesse o link: https://calendly.com/felipebittencourt-4-o\nSelecione o serviço desejado e o reunião disponível, em seguida preencha com seu nome e email para identificação."""
 
                 elif textoUltimaMensagem.lower() in ["3", "3-", "3 -", "atendimento personalizado", "atendimento", "personalizado", "three", "três", "humano"]:
 
