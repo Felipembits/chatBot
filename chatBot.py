@@ -4,32 +4,84 @@ import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import datetime
 
-print("It's running")
-# Abrindo o navegador e redirecionando pro whatsapp web
+print("It's running!")
+
+# Abrindo o navegador e redirecionando para o WhatsApp Web
 navegador = webdriver.Chrome()
 navegador.maximize_window()
 navegador.get("https://web.whatsapp.com/")
-usuariosAtendidos = []
+
+# Lista de usuários em atendimento humano
 atendimentoHumano = []
+
+# Obtém a data atual
+ultimaExecucao = datetime.datetime.now().strftime("%d-%m-%Y")
+
+# Lê a última execução a partir do arquivo ultimaExecucao.txt
+with open('ultimaExecucao.txt', 'r') as arquivoUltimaExecucao:
+    ultimaExecucaoTxt = arquivoUltimaExecucao.read().strip()
+
+# Converte o texto de ultimaExecucao.txt para um objeto datetime, se houver
+if ultimaExecucaoTxt:
+    ultimaExecucaoSalva = ultimaExecucaoTxt
+else:
+    ultimaExecucaoSalva = None
+
+print(
+    f"Última execução: {ultimaExecucaoSalva}, data e hora atual: {ultimaExecucao}")
+
+# Se a última execução for diferente da última salva, atualiza o arquivo usuariosAtendidos.txt
+if str(ultimaExecucao) != ultimaExecucaoSalva:
+    with open('usuariosAtendidos.txt', 'w') as arquivoNomes:
+        arquivoNomes.write("")
+        print("Arquivo 'usuariosAtendidos.txt' apagado com sucesso.")
+    with open('ultimaExecucao.txt', 'w') as arquivoUltimaExecucao:
+        arquivoUltimaExecucao.write(ultimaExecucao)
+    usuariosAtendidos = []
+else:
+    # Lê a lista de usuários atendidos do arquivo
+    with open('usuariosAtendidos.txt', 'r') as arquivo:
+        usuariosAtendidos = [linha.strip()
+                             for linha in arquivo.readlines() if linha.strip()]
 while len(navegador.find_elements(By.ID, "side")) < 1:
     time.sleep(1)
 filtro = WebDriverWait(navegador, 5).until(EC.presence_of_element_located(
-            (By.XPATH, '//*[@id="side"]/div[1]/div/button/div/span')))
+    (By.XPATH, '//*[@id="side"]/div[1]/div/button/div/span')))
 filtro.click()
 time.sleep(5)
 while True:
-    # Tentando encontrar uma conversa não lida e entrar nela  
-  
-    try:
+    # Verificando os usuários atendidos anteriormente e adicionando-os à lista
+    with open('usuariosAtendidos.txt', 'a+') as arquivo:
+        # Move o ponteiro para o início do arquivo
+        arquivo.seek(0)
 
-        todasConversasNaoLidas = WebDriverWait(navegador, 5).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'ggj6brxn.gfz4du6o.r7fjleex.g0rxnol2.lhj4utae.le5p0ye3.l7jjieqr._11JPr')))
+        # Lê o conteúdo atual do arquivo e armazena em uma lista
+        usuarios_no_arquivo = arquivo.read().split("\n")
+
+        # Itera sobre os usuários
+        for usuario in usuariosAtendidos:
+            # Verifica se o usuário já está no arquivo
+            if usuario not in usuarios_no_arquivo:
+                # Adiciona o usuário ao arquivo
+                arquivo.write(f"{usuario}\n")
+                print(
+                    f"Usuário '{usuario}' adicionado ao arquivo 'usuariosAtendidos.txt' com sucesso.")
+    try:
+        # Obtém todas as conversas não lidas
+        todasConversasNaoLidas = WebDriverWait(navegador, 5).until(EC.presence_of_all_elements_located(
+            (By.CLASS_NAME, 'ggj6brxn.gfz4du6o.r7fjleex.g0rxnol2.lhj4utae.le5p0ye3.l7jjieqr._11JPr')))
+
+        # Filtra as conversas não lidas
         conversasNaoLidas = [conversa for conversa in todasConversasNaoLidas]
+
+        # seleciona a primeira conversa não lida da lista
         conversa = conversasNaoLidas[0]
-        print(conversa.text)
 
         for conversa in conversasNaoLidas if conversasNaoLidas != "" else time.sleep(1):
-            mensagemPreview = WebDriverWait(navegador, 5).until(EC.presence_of_element_located((By.CLASS_NAME,"p357zi0d.r15c9g6i")))
+            mensagemPreview = WebDriverWait(navegador, 5).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "p357zi0d.r15c9g6i")))
             if mensagemPreview.text.lower() == "voltar" and conversa.text in atendimentoHumano:
                 atendimentoHumano.remove(conversa.text)
             elif conversa.text in atendimentoHumano:
@@ -37,52 +89,78 @@ while True:
                 conversasNaoLidas.remove(conversasNaoLidas[0])
                 continue
             else:
+
                 conversa.click()
                 # Obtenha o nome do cliente
                 nomeCliente = WebDriverWait(navegador, 5).until(EC.presence_of_element_located(
                     (By.XPATH, '//*[@id="main"]/header/div[2]/div/div/div/span')))
                 nome = nomeCliente.text
-                
+
                 # Obtenha o conteúdo da última mensagem do cliente
                 todasMensagens = WebDriverWait(navegador, 5).until(
                     EC.presence_of_all_elements_located((By.CLASS_NAME, "_21Ahp")))
-                textosMensagens = [mensagem.text for mensagem in todasMensagens]
+                textosMensagens = [
+                    mensagem.text for mensagem in todasMensagens]
                 textoUltimaMensagem = textosMensagens[-1]
                 print(textoUltimaMensagem)
 
                 # Responda a mensagem do cliente
                 mensagem = ""
-                if nome not in usuariosAtendidos:
 
-                    mensagem = """Olá, eu sou Samy. Um robô assistente em fase de testes.\nDigite o número relacionado com o que eu posso fazer por você:\n\n1- Tabela de preços\n2 - Marcar horário\n3 - Falar com um atendente humano"""
-                    usuariosAtendidos.append(nome)     
+                if textoUltimaMensagem.lower() in ["ola boa noite", "oi boa noite", "ola, boa noite.", "oi, boa noite", "ola, boa noite", "oi, boa noite.", "boa noite", "boa noite!"]:
 
-                elif textoUltimaMensagem == "1" or textoUltimaMensagem.lower() == "tabela de preços" or textoUltimaMensagem.lower() == "tabela" or textoUltimaMensagem.lower() == "preços" or textoUltimaMensagem.lower() == "one" or textoUltimaMensagem.lower() == "um":
-                    
-                    mensagem = """Tabela de preços."""
+                    mensagem = f"""Boa noite! Eu sou Samy. Uma robô assistente.\nPor favor, digite o número relacionado com o que eu posso fazer por você:\n\n1- Tabela de preços\n2 - Marcar reunião\n3 - Atendimento personalizado"""
+                    usuariosAtendidos.append(nome)
 
-                elif textoUltimaMensagem == "2" or textoUltimaMensagem.lower() == "marcar horário" or textoUltimaMensagem.lower() == "marcar" or textoUltimaMensagem.lower() == "horário" or textoUltimaMensagem.lower() == "two" or textoUltimaMensagem.lower() == "dois":
+                elif textoUltimaMensagem.lower() in ["ola bom dia", "oi bom dia", "ola, bom dia.", "oi, bom dia", "ola, bom dia", "oi, bom dia.", "bom dia", "bom dia!"]:
 
-                    mensagem = """Marcar horário."""
+                    mensagem = """Bom dia! Eu sou Samy. Uma Robô assistente.\nPor favor, digite o número relacionado com o que eu posso fazer por você:\n\n1- Tabela de preços\n2 - Marcar reunião\n3 - Atendimento personalizado"""
+                    usuariosAtendidos.append(nome)
 
-                elif textoUltimaMensagem == "3" or textoUltimaMensagem.lower() == "falar com um atendente humano" or textoUltimaMensagem.lower() == "falar" or textoUltimaMensagem.lower() == "atendente" or textoUltimaMensagem.lower() == "humano" or textoUltimaMensagem.lower() == "three" or textoUltimaMensagem.lower() == "três":
-                
-                    mensagem = """Você optou por falar com um atendente humano. Quando desejar retornar ao atendimento com o robô, digite "voltar". O atendente humano entrará em contato em breve."""
+                elif textoUltimaMensagem.lower() in ["ola boa tarde", "oi boa tarde", "ola, boa tarde.", "oi, boa tarde", "ola, boa tarde", "oi, boa tarde.", "boa tarde", "boa tarde!"]:
+
+                    mensagem = """Boa tarde! Eu sou Samy. Uma Robô assistente.\nPor favor, digite o número relacionado com o que eu posso fazer por você:\n\n1- Tabela de preços\n2 - Marcar reunião\n3 - Atendimento personalizado"""
+                    usuariosAtendidos.append(nome)
+
+                elif nome not in usuariosAtendidos:
+
+                    mensagem = """Olá, eu sou Samy. Uma Robô assistente.\nPor favor, digite o número relacionado com o que eu posso fazer por você:\n\n1- Tabela de preços\n2 - Marcar reunião\n3 - Atendimento personalizado"""
+                    usuariosAtendidos.append(nome)
+
+                elif textoUltimaMensagem.lower() in ["1", "Tabela de preços", "tabela", "preços", "one", "um", "preco", "preço", "preço", "preco", "uno", "11", "1-", "1 -"]:
+
+                    mensagem = """Os preços de uma landing page podem variar de acordo com a complexidade do projeto. Podendo custar entre R$ 500,00 e R$ 1.500,00.\n"""
+
+                elif textoUltimaMensagem.lower() in ["2", "2-", "2 -", "marcar reunião", "marcar", "reunião", "two", "dois", "agendar reunião", "agendar", "agendar reuniao", "agendar reuniao", "marca", "agenda"]:
+
+                    mensagem = """Para agendar um reunião, acesse o link: https://calendly.com/felipebittencourt-4-o\nSelecione o serviço desejado e o reunião disponível, em seguida preencha com seu nome e email para identificação."""
+
+                elif textoUltimaMensagem.lower() in ["3", "3-", "3 -", "atendimento personalizado", "atendimento", "personalizado", "three", "três", "humano"]:
+
+                    mensagem = """Você optou por falar com um atendente humano. Quando desejar retornar ao atendimento com a Samy, digite "voltar". O atendente humano entrará em contato assim que possível."""
                     atendimentoHumano.append(nome)
-                    
-                elif textoUltimaMensagem.lower() == "voltar":
-                    
-                    mensagem = """Você optou por voltar ao atendimento com Samy.\nDigite o número relacionado com o que eu posso fazer por você:\n\n1- Tabela de preços\n2 - Marcar horário\n3 - Falar com um atendente humano"""
+
+                elif textoUltimaMensagem.lower() in ["voltar", "volta", "reiniciar", "reinicia"]:
+
+                    mensagem = """Você optou por voltar ao atendimento com Samy.\nDigite o número relacionado com o que eu posso fazer por você:\n\n1- Tabela de preços\n2 - Marcar reunião\n3 - Atendimento personalizado"""
+
+                elif textoUltimaMensagem.lower() in ["obrigado", "obrigada", "brigado", "brigada", "obg", "obgd", "valeu", "vlw", "obrigado!", "obrigada!", "brigado!", "brigada!", "obg!", "obgd!", "valeu!", "vlw!", "obrigado.", "obrigada.", "brigado.", "brigada.", "obg.", "obgd.", "valeu.", "vlw.", "muito obrigado", "muito obrigada", "brigadão", "obrigadão"]:
+
+                    mensagem = "Por nada! Estou aqui para ajudar."
 
                 else:
-                    mensagem = "Não entendi o que você quis dizer."
+
+                    mensagem = "Desculpa, não entendi o que você quis dizer. Por favor, envie uma mensagem válida."
+
                 if mensagem != "":
                     mensagem = mensagem.split("\n")
                     caixaMensagem = WebDriverWait(navegador, 5).until(
                         EC.presence_of_element_located((By.CLASS_NAME, "_3Uu1_")))
+
                     for texto in mensagem:
                         caixaMensagem.send_keys(texto)
                         caixaMensagem.send_keys(Keys.SHIFT, Keys.ENTER)
+
                 caixaMensagem.send_keys(Keys.RETURN)
                 opcoes2 = WebDriverWait(navegador, 5).until(EC.presence_of_element_located(
                     (By.XPATH, '//*[@id="main"]/header/div[3]/div/div[3]/div/div/span')))
@@ -93,6 +171,7 @@ while True:
                 fecharConversa.click()
                 print(nome, usuariosAtendidos)
                 time.sleep(3)
+
     except:
         time.sleep(1)
         continue
