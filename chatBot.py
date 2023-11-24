@@ -17,7 +17,7 @@ navegador.get("https://web.whatsapp.com/")
 
 # Lista de usuários em atendimento humano
 atendimentoHumano = []
-
+erros = []
 # Obtém a data atual
 ultimaExecucao = datetime.datetime.now().strftime("%d-%m-%Y")
 
@@ -86,6 +86,25 @@ while True:
                 EC.presence_of_element_located((By.CLASS_NAME, "p357zi0d.r15c9g6i")))
             if mensagemPreview.text.lower() == "voltar" and conversa.text in atendimentoHumano:
                 atendimentoHumano.remove(conversa.text)
+                conversa.click()
+                mensagem = """Você optou por voltar ao atendimento com Samy.\nDigite o número relacionado com o que eu posso fazer por você:\n\n1- Tabela de preços\n2 - agendar reunião\n3 - Atendimento humano"""
+                mensagem = mensagem.split("\n")
+                caixaMensagem = WebDriverWait(navegador, 5).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "_3Uu1_")))
+
+                for texto in mensagem:
+                    caixaMensagem.send_keys(texto)
+                    caixaMensagem.send_keys(Keys.SHIFT, Keys.ENTER)
+
+                caixaMensagem.send_keys(Keys.RETURN)
+                opcoes2 = WebDriverWait(navegador, 5).until(EC.presence_of_element_located(
+                    (By.CLASS_NAME, 'kiiy14zj')))
+                opcoes2.click()
+                time.sleep(1)
+                fecharConversa = WebDriverWait(navegador, 5).until(EC.presence_of_element_located(
+                    (By.XPATH, '//*[@id="app"]/div/span[4]/div/ul/div/div/li[3]/div')))
+                fecharConversa.click()
+
             elif conversa.text in atendimentoHumano:
                 conversasNaoLidas.remove(conversa)
                 conversasNaoLidas.remove(conversasNaoLidas[0])
@@ -111,22 +130,22 @@ while True:
 
                 if textoUltimaMensagem.lower() in ["ola boa noite", "oi boa noite", "ola, boa noite.", "oi, boa noite", "ola, boa noite", "oi, boa noite.", "boa noite", "boa noite!"]:
 
-                    mensagem = f"""Boa noite! Eu sou Samy. Uma robô assistente.\nPor favor, digite o número relacionado com o que eu posso fazer por você:\n\n1- Tabela de preços\n2 - Marcar reunião\n3 - Atendimento personalizado"""
+                    mensagem = f"""Boa noite! Eu sou Samy. Uma robô assistente.\nPor favor, digite o número relacionado com o que eu posso fazer por você:\n\n1- Tabela de preços\n2 - agendar reunião\n3 - Atendimento humano"""
                     usuariosAtendidos.append(nome)
 
                 elif textoUltimaMensagem.lower() in ["ola bom dia", "oi bom dia", "ola, bom dia.", "oi, bom dia", "ola, bom dia", "oi, bom dia.", "bom dia", "bom dia!"]:
 
-                    mensagem = """Bom dia! Eu sou Samy. Uma Robô assistente.\nPor favor, digite o número relacionado com o que eu posso fazer por você:\n\n1- Tabela de preços\n2 - Marcar reunião\n3 - Atendimento personalizado"""
+                    mensagem = """Bom dia! Eu sou Samy. Uma Robô assistente.\nPor favor, digite o número relacionado com o que eu posso fazer por você:\n\n1- Tabela de preços\n2 - agendar reunião\n3 - Atendimento humano"""
                     usuariosAtendidos.append(nome)
 
                 elif textoUltimaMensagem.lower() in ["ola boa tarde", "oi boa tarde", "ola, boa tarde.", "oi, boa tarde", "ola, boa tarde", "oi, boa tarde.", "boa tarde", "boa tarde!"]:
 
-                    mensagem = """Boa tarde! Eu sou Samy. Uma Robô assistente.\nPor favor, digite o número relacionado com o que eu posso fazer por você:\n\n1- Tabela de preços\n2 - Marcar reunião\n3 - Atendimento personalizado"""
+                    mensagem = """Boa tarde! Eu sou Samy. Uma Robô assistente.\nPor favor, digite o número relacionado com o que eu posso fazer por você:\n\n1- Tabela de preços\n2 - agendar reunião\n3 - Atendimento humano"""
                     usuariosAtendidos.append(nome)
 
                 elif nome not in usuariosAtendidos:
 
-                    mensagem = """Olá, eu sou Samy. Uma Robô assistente.\nPor favor, digite o número relacionado com o que eu posso fazer por você:\n\n1- Tabela de preços\n2 - Marcar reunião\n3 - Atendimento personalizado"""
+                    mensagem = """Olá, eu sou Samy. Uma Robô assistente.\nPor favor, digite o número relacionado com o que eu posso fazer por você:\n\n1- Tabela de preços\n2 - agendar reunião\n3 - Atendimento humano"""
                     usuariosAtendidos.append(nome)
 
                 elif textoUltimaMensagem.lower() in ["1", "Tabela de preços", "tabela", "preços", "one", "um", "preco", "preço", "preço", "preco", "uno", "11", "1-", "1 -"]:
@@ -137,23 +156,32 @@ while True:
 
                     mensagem = """Para agendar uma reunião, acesse o link: https://calendly.com/felipebittencourt-4-o\nSelecione o serviço desejado e o reunião disponível, em seguida preencha com seu nome e email para identificação."""
 
-                elif textoUltimaMensagem.lower() in ["3", "3-", "3 -", "atendimento personalizado", "atendimento", "personalizado", "three", "três", "humano"]:
+                elif textoUltimaMensagem.lower() in ["3", "3-", "3 -", "atendimento humano", "atendimento", "humano", "three", "três", "humano"]:
 
                     mensagem = """Você optou por falar com um atendente humano. Quando desejar retornar ao atendimento com a Samy, digite "voltar". O atendente humano entrará em contato assim que possível."""
                     atendimentoHumano.append(nome)
-
-                elif textoUltimaMensagem.lower() in ["voltar", "volta", "reiniciar", "reinicia"]:
-
-                    mensagem = """Você optou por voltar ao atendimento com Samy.\nDigite o número relacionado com o que eu posso fazer por você:\n\n1- Tabela de preços\n2 - Marcar reunião\n3 - Atendimento personalizado"""
 
                 elif textoUltimaMensagem.lower() in ["obrigado", "obrigada", "brigado", "brigada", "obg", "obgd", "valeu", "vlw", "obrigado!", "obrigada!", "brigado!", "brigada!", "obg!", "obgd!", "valeu!", "vlw!", "obrigado.", "obrigada.", "brigado.", "brigada.", "obg.", "obgd.", "valeu.", "vlw.", "muito obrigado", "muito obrigada", "brigadão", "obrigadão"]:
 
                     mensagem = "Por nada! Estou aqui para ajudar."
 
+                elif textoUltimaMensagem.lower() in ['valida', 'válida', 'mensagem', 'mensagem válida', 'mensagem valida']:
+                    mensagem = "Engraçadinho(a) você, hein?"
+
+                elif erros.count(nome) < 3:
+                    if erros.count(nome) == 0:
+                        mensagem = "Desculpa, não entendi o que você quis dizer. Por favor, envie uma mensagem válida."
+                    elif erros.count(nome) == 1:
+                        mensagem = "Por ser uma robô assistente, ainda não consigo entender tudo o que você diz. Por favor, envie uma mensagem válida."
+                    elif erros.count(nome) == 2:
+                        mensagem = "Peço perdão, não consegui entender. Por favor, envie uma mensagem válida."
+                    erros.append(nome)
+
                 else:
-
-                    mensagem = "Desculpa, não entendi o que você quis dizer. Por favor, envie uma mensagem válida."
-
+                    mensagem = "Talvez tenha ocorrido uma falha na nossa comunicação. Por favor, digite o número relacionado com o que eu posso fazer por você:\n\n1- Tabela de preços\n2 - agendar reunião\n3 - Atendimento humano"
+                    erros.remove(nome)
+                    erros.remove(nome)
+                    erros.remove(nome)
                 if mensagem != "":
                     mensagem = mensagem.split("\n")
                     caixaMensagem = WebDriverWait(navegador, 5).until(
@@ -165,14 +193,13 @@ while True:
 
                 caixaMensagem.send_keys(Keys.RETURN)
                 opcoes2 = WebDriverWait(navegador, 5).until(EC.presence_of_element_located(
-                    (By.XPATH, '//*[@id="main"]/header/div[3]/div/div[3]/div/div/span')))
+                    (By.CLASS_NAME, 'kiiy14zj')))
                 opcoes2.click()
                 time.sleep(1)
                 fecharConversa = WebDriverWait(navegador, 5).until(EC.presence_of_element_located(
                     (By.XPATH, '//*[@id="app"]/div/span[4]/div/ul/div/div/li[3]/div')))
                 fecharConversa.click()
                 print(nome, usuariosAtendidos)
-                time.sleep(3)
 
     except:
         time.sleep(1)
