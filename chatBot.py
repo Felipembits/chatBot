@@ -197,7 +197,7 @@ while True:
                 opcoes2.click()
                 time.sleep(1)
                 fecharConversa = WebDriverWait(navegador, 5).until(EC.presence_of_element_located(
-                    (By.XPATH, '//*[@id="app"]/div/span[4]/div/ul/div/div/li[3]/div')))
+                    (By.XPATH, '//*[@id="app"]/div/span[5]/div/ul/div/div/li[3]/div')))
                 fecharConversa.click()
                 print(nome, usuariosAtendidos)
 
